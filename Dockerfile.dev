@@ -12,4 +12,4 @@ COPY . .
 RUN dotnet restore
 
 # Keep container running
-ENTRYPOINT ["dotnet", "watch", "run", "--project", "TaskManagement.API/TaskManagement.API.csproj", "--urls", "http://+:80"]
+ENTRYPOINT ["dotnet", "watch", "run", "--urls", "http://+:80", "--project", "TaskManagement.API/TaskManagement.API.csproj"]
