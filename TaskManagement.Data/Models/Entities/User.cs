@@ -1,44 +1,36 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 public class User : BaseEntity, IAuditableEntity
 {
-    public EmailAddress Email { get; private set; }
-    public string PasswordHash { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
+    [Required]
+    [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Invalid email format")]
+    public string Email { get; private set; } = null!;
+    [Required]
+    [MinLength(8)]
+    public string PasswordHash { get; private set; } = null!;
+    [Required]
+    [MaxLength(50)]
+    [MinLength(2)]
+    public string FirstName { get; private set; } = null!;
+    [Required]
+    [MaxLength(50)]
+    public string LastName { get; private set; } = null!;
+    [Required]
     public bool IsActive { get; private set; }
 
-    // Navigation Properties
-    public virtual ICollection<Role> Roles { get; private set; } = new List<Role>();
+    public Guid UserRoleId { get; private set; }
 
-    // Audit (stored, not computed)
+    // Navigation Properties
+    [ForeignKey(nameof(UserRoleId))]
+    public UserRole UserRole { get; private set; } = null!;
+
+    // Audit
     public DateTime CreatedAt { get; private set; }
     public string? CreatedBy { get; private set; }
     public DateTime? LastModifiedAt { get; private set; }
     public string? LastModifiedBy { get; private set; }
-
-    // EF Core only
-    private User()
-    {
-        Email = null!;
-        PasswordHash = null!;
-        FirstName = null!;
-        LastName = null!;
-    }
-
-    public User(
-        EmailAddress email,
-        string passwordHash,
-        string firstName,
-        string lastName
-    )
-    {
-        Email = email ?? throw new DomainException("Email is required");
-        SetPasswordHash(passwordHash);
-        SetName(firstName, lastName);
-        IsActive = true;
-        CreatedAt = DateTime.UtcNow;
-    }
 
     // Behavioral Methods
     [MemberNotNull(nameof(FirstName), nameof(LastName))]
