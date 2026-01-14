@@ -1,19 +1,16 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 public class Role : BaseEntity, IAuditableEntity
 {
     [Required]
     [MaxLength(100)]
     public string Name { get; private set; } = null!;
-    [MaxLength(250)]
-    public string Description { get; private set; }
 
-    public Guid UserRoleId { get; private set; }
+    [MaxLength(250)]
+    public string Description { get; private set; } = null!;
 
     // Navigation Properties
-    [ForeignKey(nameof(UserRoleId))]
-    public UserRole UserRole { get; private set; } = null!;
+    public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
 
     // Audit
     public DateTime CreatedAt { get; private set; }
@@ -32,11 +29,15 @@ public class Role : BaseEntity, IAuditableEntity
 
     public Role(string name, string description)
     {
+        Name = name;
+        Description = description;
+    }
+
+    public static Role Create(string name, string description)
+    {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Role name is required");
 
-        Name = name;
-        Description = description;
-        // CreatedAt = DateTime.UtcNow;
+        return new Role(name, description);
     }
 }
